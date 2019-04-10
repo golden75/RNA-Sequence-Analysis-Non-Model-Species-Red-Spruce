@@ -18,8 +18,40 @@ When an organism is called "model" there is an underlying assumption that very g
 
 ![ out line ](/images/outline_wide.png)  
 
+The data consists of 3 libraries under three different treatments:  
+*  Ambient Carbondioxide condition  
+*  Elevated Carbondioxide condition  
+*  Cotreated for both condition  
 
+In this workflow we have seperated each step into folders, where you can find the appropriate scripts in conjunction with each steps. When you clone the git repository, the below directory structure will be cloned into your working directory.  
 
+``` 
+RNA-Sequence-Analysis-Non-Model-Species-Red-Spruce
+├── images
+├── raw_reads
+```  
 
+In this tutorial we will be using SLURM schedular to submit jobs to Xanadu cluster. In each script we will be using it will contain a header section which will allocate the resources for the SLURM schedular. The header section will contain:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=JOBNAME
+#SBATCH -n 1
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH --mem=1G
+#SBATCH --partition=general
+#SBATCH --qos=general
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=first.last@uconn.edu
+#SBATCH -o %x_%j.out
+#SBATCH -e %x_%j.err
+
+```
+
+Before beginning, we need to understand a few aspects of the Xanadu server. When first logging into Xanadu from your local terminal, you will be connected to the submit node. The submit node is the interface with which users on Xanadu may submit their processes to the desired compute nodes, which will run the process. Never, under any circumstance, run processes directly in the submit node. Your process will be killed and all of your work lost! This tutorial will not teach you shell script configuration to submit your tasks on Xanadu. Therefore, before moving on, read and master the topics covered in the [Xanadu tutorial](https://bioinformatics.uconn.edu/resources-and-events/tutorials-2/xanadu/).  
+
+Note:  
+If you are woking in Xanadu cluster, the raw reads may not need to be copied into you directory. In the raw_data folder we have created a script called [initialize.sh](/raw_reads/initialize.sh) when executed will create sim-links to the actual read files. With this way we can avolid making unnessary copies of the read data.  
 
 

@@ -53,5 +53,35 @@ Before beginning, we need to understand a few aspects of the Xanadu server. When
 
 Note:  
 If you are woking in Xanadu cluster, the raw reads may not need to be copied into you directory. In the raw_data folder we have created a script called [initialize.sh](/raw_reads/initialize.sh) when executed will create sim-links to the actual read files. With this way we can avolid making unnessary copies of the read data.  
+So once you ran the script the raw_reads folder will look like:  
+```
+raw_reads/
+├── ambient.fastq 
+├── cotreated.fastq 
+├── elevated.fastq 
+└── initialize.sh
+```  
+
+### Familiarizing yourself with the raw reads  
+
+The reads with which we will be working have been sequenced using [Illumina](https://www.illumina.com/techniques/sequencing.html). We assume that you are familiar with the sequencing technology. Let's have a look at the content of one of our reads, which are in the "fastq" format:  
+
+```bash  
+head -n 4 ambient.fastq
+```  
+
+which will show the first four lines in the fastq file:  
+
+```
+@HWI-ST318_0118:3:1:1185:2192#0/1
+CCCTTCCTGAGATGTAAGTCCTGATCTTGANNNTNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
++HWI-ST318_0118:3:1:1185:2192#0/1
+cbabc`cY``UVVZT^\\^^b\bbb`Z_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+```
+
+In here we see that first line corrosponds to the sample information followed by the length of the read, and in the second line corrosponds to the nucleotide reads, followed by the "+" sign where if repeats the information in the first line. Then the fourth line corrosponds to the quality score for each nucleotide in the first line.  
+
+
+## 2. Quality Conrol using Sickle  
 
 

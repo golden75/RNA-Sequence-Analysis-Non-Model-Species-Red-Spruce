@@ -82,6 +82,43 @@ cbabc`cY``UVVZT^\\^^b\bbb`Z_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 In here we see that first line corrosponds to the sample information followed by the length of the read, and in the second line corrosponds to the nucleotide reads, followed by the "+" sign where if repeats the information in the first line. Then the fourth line corrosponds to the quality score for each nucleotide in the first line.  
 
 
-## 2. Quality Conrol using Sickle  
+## 2. Quality Conrol   
+
+### Quality control of Illumina reads using Sickle  
+Step one is to perform quality control on the reads, and we will be using Sickle for the Illumina reads. To start with we have single-end reads.  
+
+
+```
+module load sickle/1.33
+sickle se -f ../raw_reads/ambient.fastq -t illumina -o ambient.trimmed.fastq -q 30 -l 35
+sickle se -f ../raw_reads/elevated.fastq -t illumina -o elevated.trimmed.fastq -q 30 -l 35
+sickle se -f ../raw_reads/cotreated.fastq -t illumina -o cotreated.trimmed.fastq -q 30 -l 35
+```  
+
+The useage information on the sickle program:  
+```bash
+Usage: sickle se [options] -f <fastq sequence file> -t <quality type> -o <trimmed fastq file> 
+
+Options:
+-f, --fastq-file, Input fastq file (required)
+-t, --qual-type, Type of quality values
+		solexa (CASAVA < 1.3)
+		illumina (CASAVA 1.3 to 1.7)
+		sanger (which is CASAVA >= 1.8)
+-o, --output-file, Output trimmed fastq file (required)
+-q, --qual-threshold, trimming based on average quality in a window. Default 20.
+-l, --length-threshold, Threshold to keep a read based on length after trimming. Default 20.
+```  
+
+The quality may be any score from 0 to 40. The default of 20 is much too low for a robust analysis. We want to select only reads with a quality of 30 or better. Additionally, the desired length of each read is 35bp. Again, we see that a default of 20 is much too low for analysis confidence. Lastly, we must know the scoring type. While the quality type is not listed on the SRA pages, most SRA reads use the "sanger" quality type. Unless explicitly stated, try running sickle using the sanger qualities. If an error is returned, try illumina. If another error is returned, lastly try solexa.  
+
+The full slurm script which is called [sickle.sh](/quality_control/sickle.sh) is stored in the quality_control folder.  
+
+ 
+
+
+ 
+
+
 
 

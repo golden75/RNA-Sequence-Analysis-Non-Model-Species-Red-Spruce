@@ -114,7 +114,47 @@ The quality may be any score from 0 to 40. The default of 20 is much too low for
 
 The full slurm script which is called [sickle.sh](/quality_control/sickle.sh) is stored in the quality_control folder.  
 
- 
+At the end of the job it will produce the following trimmed files as follows:  
+``` 
+quality_control/
+├── ambient.trimmed.fastq
+├── cotreated.trimmed.fastq
+├── elevated.trimmed.fastq
+├── sickle_352.err
+├── sickle_352.out
+└── sickle.sh
+```  
+
+The summary of the reads will be in the `*.out` file, which will give how many reads is kept and how many have been discarded in each run.  
+
+```
+SE input file: ../raw_reads/ambient.fastq
+
+Total FastQ records: 103531742
+FastQ records kept: 83066649
+FastQ records discarded: 20465093
+
+
+SE input file: ../raw_reads/elevated.fastq
+
+Total FastQ records: 97712226
+FastQ records kept: 81595012
+FastQ records discarded: 16117214
+
+
+SE input file: ../raw_reads/cotreated.fastq
+
+Total FastQ records: 101490246
+FastQ records kept: 81173217
+FastQ records discarded: 20317029
+```  
+
+| Sample | Initial Records | Records kept | Records Discarded |  
+| --- | --- | --- | --- |  
+| ambient | 103531742 | 83066649 | 20465093 |  
+| elevated | 97712226 | 81595012 | 16117214 |  
+| cotreated | 101490246 | 81173217 | 20317029 |  
+
 
 
  

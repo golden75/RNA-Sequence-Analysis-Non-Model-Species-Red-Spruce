@@ -149,11 +149,13 @@ FastQ records kept: 81173217
 FastQ records discarded: 20317029
 ```  
 
-| Sample | Initial Records | Records kept | Records Discarded |  
-| --- | --- | --- | --- |  
-| ambient | 103531742 | 83066649 | 20465093 |  
-| elevated | 97712226 | 81595012 | 16117214 |  
-| cotreated | 101490246 | 81173217 | 20317029 |  
+| Sample | Initial Records | Records kept | Records Discarded | Kept (%) |   
+| --- | --- | --- | --- | --- | 
+| ambient | 103531742 | 83066649 | 20465093 | 80.23 |   
+| elevated | 97712226 | 81595012 | 16117214 | 83.50 |   
+| cotreated | 101490246 | 81173217 | 20317029 | 79.98 |  
+
+ 
 
 
 

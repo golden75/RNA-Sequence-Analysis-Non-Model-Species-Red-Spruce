@@ -88,7 +88,7 @@ In here we see that first line corrosponds to the sample information followed by
 Step one is to perform quality control on the reads, and we will be using Sickle for the Illumina reads. To start with we have single-end reads.  
 
 
-```
+```bash
 module load sickle/1.33
 sickle se -f ../raw_reads/ambient.fastq -t illumina -o ambient.trimmed.fastq -q 30 -l 35
 sickle se -f ../raw_reads/elevated.fastq -t illumina -o elevated.trimmed.fastq -q 30 -l 35
@@ -96,7 +96,7 @@ sickle se -f ../raw_reads/cotreated.fastq -t illumina -o cotreated.trimmed.fastq
 ```  
 
 The useage information on the sickle program:  
-```bash
+```
 Usage: sickle se [options] -f <fastq sequence file> -t <quality type> -o <trimmed fastq file> 
 
 Options:

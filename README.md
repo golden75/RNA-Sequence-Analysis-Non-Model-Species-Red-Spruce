@@ -6,7 +6,10 @@ RNA Sequence Analysis for Non Model Species (Red Spruce)
 This repository is a usable, publicly available tutorial for analyzing differential expression data and creating topological gene networks. All steps have been provided for the UConn CBC Xanadu cluster here with appropriate headers for the Slurm scheduler that can be modified simply to run.  Commands should never be executed on the submit nodes of any HPC machine.  If working on the Xanadu cluster, you should use sbatch scriptname after modifying the script for each stage.  Basic editing of all scripts can be performed on the server with tools such as nano, vim, or emacs.  If you are new to Linux, please use [this](https://bioinformatics.uconn.edu/unix-basics) handy guide for the operating system commands.  In this guide, you will be working with common bio Informatic file formats, such as [FASTA](https://en.wikipedia.org/wiki/FASTA_format), [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format), [SAM/BAM](https://en.wikipedia.org/wiki/SAM_(file_format)), and [GFF3/GTF](https://en.wikipedia.org/wiki/General_feature_format). You can learn even more about each file format [here](https://bioinformatics.uconn.edu/resources-and-events/tutorials/file-formats-tutorial/). If you do not have a Xanadu account and are an affiliate of UConn/UCHC, please apply for one **[here](https://bioinformatics.uconn.edu/contact-us/)**.   
 
 Contents   
-1.  [Introduction](#1-introduction)    
+1.  [Introduction](#1-introduction)   
+2.  [Quality Conrol](#2-quality-control)  
+3.  [Assembling the Transcriptome](#3-assembling-the-transcriptome)  
+   
 
 
 
@@ -82,7 +85,7 @@ cbabc`cY``UVVZT^\\^^b\bbb`Z_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 In here we see that first line corrosponds to the sample information followed by the length of the read, and in the second line corrosponds to the nucleotide reads, followed by the "+" sign where if repeats the information in the first line. Then the fourth line corrosponds to the quality score for each nucleotide in the first line.  
 
 
-## 2. Quality Conrol   
+## 2. Quality Control   
 
 ### Quality control of Illumina reads using Sickle  
 Step one is to perform quality control on the reads, and we will be using Sickle for the Illumina reads. To start with we have single-end reads.  
@@ -156,6 +159,117 @@ FastQ records discarded: 20317029
 | cotreated | 101490246 | 81173217 | 20317029 | 79.98 |  
 
  
+  
+  
+## 3. Assembling the Transcriptome  
+
+### De novo Assembling the Transcriptome using Trinity  
+
+Now that we've performed quality control we are ready to assemble our transcriptome using the RNA-Seq reads. We will be using the software [Trinity](https://github.com/trinityrnaseq/trinityrnaseq/wiki). Nearly all transcriptome assembly software operates under the same premise. Consider the following:   
+
+Suppose we have the following reads:  
+```
+A C G A C G T T T G A G A  
+T T G A G A T T A C C T A G 
+```  
+
+We notice that the end of each read is the beginning of the next read, so we assemble them as one sequence by matching the overlaps:   
+```
+A C G A C G T T T G A G A 
+              T T G A G A T T A C C T A G  
+```  
+
+Which gives us:  
+```
+A C G A C G T [T T G A G A] T T A C C T A G 
+```  
+
+  
+### De novo Assembling the Transcriptome using Trinity  
+
+In De novo assembly section, we will be woking in the `assembly` directory. In here we will be assembling the trimmed illumina reads seperatly using the trinity transcriptome assembler. Assembly requires a great deal of memory (RAM) and can take few days if the read set is large. Following is the trinity command that we use to assemble each transcriptome seperatly.   
+
+```bash  
+module load trinity/2.6.6
+
+Trinity --seqType fq \
+        --max_memory 100G \
+        --single ../quality_control/ambient.trimmed.fastq \
+        --min_contig_length 300 \
+        --CPU 16 \
+        --normalize_reads \
+        --output trinity_ambient \
+        --full_cleanup
+
+Trinity --seqType fq \
+        --max_memory 100G \
+        --single ../quality_control/cotreated.trimmed.fastq \
+        --min_contig_length 300 \
+        --CPU 16 \
+        --normalize_reads \
+        --output trinity_cotreated \
+        --full_cleanup
+
+Trinity --seqType fq \
+        --max_memory 100G \
+        --single ../quality_control/elevated.trimmed.fastq \
+        --min_contig_length 300 \
+        --CPU 16 \
+        --normalize_reads \
+        --output trinity_elevated \
+        --full_cleanup
+```  
+
+So the useage information for Trinity program we use:  
+```
+Usage:  Trinity [options]  
+
+Options (Required):
+--seqType <string>       : type of reads: ('fa' or 'fq')
+--max_memory <string>    : max memory to use by Trinity
+--single <string>        : unpaired/single reads, one or more file names can be included 
+
+Options (optional)
+--CPU <int>              : number of CPUs to use, default: 2
+--min_contig_length <int>: minimum assembled contig length to report (def=200)
+--output <string>        : directory for output
+--full_cleanup           : only retain the Trinity fasta file, rename as ${output_dir}.Trinity.fasta
+```  
+
+
+
+
+The full slurm script is called [trinity.sh](/assembly/trinity.sh), and can be found in the assembly directory.  
+
+
+Trinity combines three independent software modules: Inchworm, Chrysalis, and Butterfly, applied sequentially to process large volumes of RNA-seq reads. Trinity partitions the sequence data into many individual de Bruijn graphs, each representing the transcriptional complexity at a given gene or locus, and then processes each graph independently to extract full-length splicing isoforms and to tease apart transcripts derived from paralogous genes. Briefly, the process works like so:   
+  
+__Inchworm__ assembles the RNA-seq data into the unique sequences of transcripts, often generating full-length transcripts for a dominant isoform, but then reports just the unique portions of alternatively spliced transcripts.  
+   
+__Chrysalis__ clusters the Inchworm contigs into clusters and constructs complete de Bruijn graphs for each cluster. Each cluster represents the full transcriptonal complexity for a given gene (or sets of genes that share sequences in common). Chrysalis then partitions the full read set among these disjoint graphs.   
+   
+__Butterfly__ then processes the individual graphs in parallel, tracing the paths that reads and pairs of reads take within the graph, ultimately reporting full-length transcripts for alternatively spliced isoforms, and teasing apart transcripts that corresponds to paralogous genes.   
+   
+During the **Trinity** run there will be lots of files will be grenerated. These checkpoint files will help us to restart from that specific point if for some reason the program stops for some other problems. Once the program ends sucessfully all these checkpoint files will be removed since we have requested a full cleanup using the `--full_cleanup` command. Clearing the files is very important as it will help us to remove all the unwanted files and also to keep the storage capacity and the number of files to a minimum. So at the end of a successful run we will end up with the following files:   
+
+```  
+assembly/
+├── trinity_ambient.Trinity.fasta
+├── trinity_ambient.Trinity.fasta.gene_trans_map
+├── trinity_cotreated.Trinity.fasta
+├── trinity_cotreated.Trinity.fasta.gene_trans_map
+├── trinity_elevated.Trinity.fasta
+├── trinity_elevated.Trinity.fasta.gene_trans_map
+└── trinity.sh
+```
+
+So we will have three assembly files, one for each condition.   
+  
+  
+## 4. Determining and removing repeat modules  
+
+### Clustering using vsearch  
+
 
 
 
